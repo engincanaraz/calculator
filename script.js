@@ -1,51 +1,90 @@
-const display = document.querySelector('.calculator-input');
-const keys = document.querySelector('.calculator-keys');
+const display = document.querySelector(".calculator-input");
+const keys = document.querySelector(".calculator-keys");
 
-let displayValue = '0';
-
+let displayValue = "0";
+let firstValue = null;
+let operator = null;
+let waitingForSecondValue = false;
 
 updateDisplay();
 
-function updateDisplay(){
- display.value = displayValue;
+function updateDisplay() {
+  display.value = displayValue;
 }
 
-keys.addEventListener('click', function(e){
+keys.addEventListener("click", function (e) {
+  const element = e.target;
+  if (!element.matches("button")) return;
 
- const element = e.target;
- if (!element.matches('button')) return;
+  if (element.classList.contains("operator")) {
+    handleOperator(element.value);
+    updateDisplay();
+    return;
+  }
 
- if (element.classList.contains('operator')){
-  console.log('operator',element.value);
-  return;
- }
+  if (element.classList.contains("decimal")) {
+    inputDecimal(element.value);
+    updateDisplay();
+    return;
+  }
 
- if (element.classList.contains('decimal')){
-  // console.log('decimal',element.value);
-  inputDecimal(element.value);
+  if (element.classList.contains("clear")) {
+    clear();
+    updateDisplay();
+    return;
+  }
+  inputNumber(element.value);
   updateDisplay();
-  return;
- }
-
- if (element.classList.contains('clear')){
-  // console.log("clear",element.value);
-  clear();
-  updateDisplay();
-  return;
- }
- inputNumber(element.value);
- updateDisplay();
- 
 });
+function handleOperator(nextOperator) {
+  const value = parseFloat(displayValue);
 
-function inputNumber(num){
- displayValue = displayValue === '0' ? num : displayValue + num;
+  if(operator && waitingForSecondValue){
+    operator = nextOperator;
+    return;
+  }
+
+  if (firstValue === null) {
+    firstValue = value;
+  } else if (operator) {
+    const result = calculate(firstValue, value, operator);
+
+    displayValue = `${parseFloat(result.toFixed(7))}`;
+    firstValue = result;
+  }
+
+  waitingForSecondValue = true;
+  operator = nextOperator;
+  console.log(displayValue, firstValue, operator, waitingForSecondValue);
 }
-function inputDecimal(){
- if (!displayValue.includes('.')){
-  displayValue += '.';
- }
+
+function calculate(first, second, operator) {
+  if (operator === "+") {
+    return first + second;
+  } else if (operator === "-") {
+    return first - second;
+  } else if (operator === "*") {
+    return first * second;
+  } else if (operator === "/") {
+    return first / second;
+  }
+  return second;
 }
-function clear (){
- displayValue = '0';
+
+function inputNumber(num) {
+  if (waitingForSecondValue) {
+    displayValue = num;
+    waitingForSecondValue = false;
+  } else {
+    displayValue = displayValue === "0" ? num : displayValue + num;
+  }
+  console.log(displayValue, firstValue, operator, waitingForSecondValue);
+}
+function inputDecimal() {
+  if (!displayValue.includes(".")) {
+    displayValue += ".";
+  }
+}
+function clear() {
+  displayValue = "0";
 }
