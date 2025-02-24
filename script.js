@@ -50,9 +50,13 @@ function handleOperator(nextOperator) {
     firstValue = value;
   } else if (operator) {
     const result = calculate(firstValue, value, operator);
-
-    displayValue = `${parseFloat(result.toFixed(7))}`;
-    firstValue = result;
+    
+    if (typeof result === 'string') {
+      displayValue = 'Hata';
+    } else {
+      displayValue = `${parseFloat(result.toFixed(7))}`;
+      firstValue = result;
+    }
   }
 
   waitingForSecondValue = true;
@@ -61,16 +65,30 @@ function handleOperator(nextOperator) {
 }
 
 function calculate(first, second, operator) {
-  if (operator === "+") {
-    return first + second;
-  } else if (operator === "-") {
-    return first - second;
-  } else if (operator === "*") {
-    return first * second;
-  } else if (operator === "/") {
-    return first / second;
+  try {
+    switch(operator) {
+      case '+': 
+        return first + second;
+      case '-': 
+        return first - second;
+      case '*': 
+        return first * second;
+      case '/': 
+        if (second === 0) {
+          throw new Error('Sıfıra bölünemez!');
+        }
+        return first / second;
+      default: 
+        return second;
+    }
+  } catch(error) {
+    displayValue = 'Hata';
+    setTimeout(() => {
+      clear();
+      updateDisplay();
+    }, 1500);
+    return error.message;
   }
-  return second;
 }
 
 function inputNumber(num) {
