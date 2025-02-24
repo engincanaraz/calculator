@@ -14,32 +14,34 @@ function updateDisplay() {
 
 keys.addEventListener("click", function (e) {
   const element = e.target;
+  const value = element.value;
+
   if (!element.matches("button")) return;
 
-  if (element.classList.contains("operator")) {
-    handleOperator(element.value);
-    updateDisplay();
-    return;
+  switch (element.value) {
+    case "+":
+    case "-":
+    case "*":
+    case "/":
+    case "=":
+      handleOperator(element.value);
+      break;
+    case ".":
+      inputDecimal(value);
+      break;
+    case "clear":
+      clear();
+      break;
+    default:
+      inputNumber(element.value);
   }
-
-  if (element.classList.contains("decimal")) {
-    inputDecimal(element.value);
-    updateDisplay();
-    return;
-  }
-
-  if (element.classList.contains("clear")) {
-    clear();
-    updateDisplay();
-    return;
-  }
-  inputNumber(element.value);
   updateDisplay();
 });
+
 function handleOperator(nextOperator) {
   const value = parseFloat(displayValue);
 
-  if(operator && waitingForSecondValue){
+  if (operator && waitingForSecondValue) {
     operator = nextOperator;
     return;
   }
